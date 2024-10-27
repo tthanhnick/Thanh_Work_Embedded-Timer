@@ -15,18 +15,41 @@
 #define SYSTICK_LOAD (0xE000E014)
 #define SYSTICK_VAL (0xE000E018)
 
-#define SCG_RCCR (0x40064000u + 0x14u)
-#define SCG_SPLLCSR (0x40064000u + 0x600u)
-#define SCG_SPLLDIV (0x40064000u + 0x604u)
-#define SCG_SPLLCFG (0x40064000u + 0x608u)
-#define SCG_SOSCCSR (0x40064000u + 0x100u)
-#define SCG_SOSCDIV (0x40064000u + 0x104u)
-#define SCG_SOSCCFG (0x40064000u + 0x108u)
+#define PCC_LIPT (0x40065000u + 0xDCu) // PCC LIPT Enable
+#define LIPT_MCR (0x40037000u + 0x8u) //LIPT MCR
+
+#define LIPT_TCTRL0 (0x40037000u + 0x28u) //LIPT TCTRL0
+#define LIPT_CVAL0 (0x40037000u + 0x24u) //LIPT CVAL0
+
+#define LIPT_MIER (0x40037000u + 0x10u) //LIPT MIER
+#define LIPT_MSR (0x40037000u + 0xCu) //LIPT MSR
+
+#define LIPT_TCTRL2 (0x40037000u + 0x48u) //LIPT TCTRL2
+#define LIPT_TVAL2 (0x40037000u + 0x40u) //LIPT TVAL2
+
+#define NVIC_INTERRUPT (0xE000E100u + 4*1) // NVIC Interrupt ID n*4
+// NVIC Interrupt LIPT2 50 div 32 = 1 
+// NVIC Interrupt LIPT3 51 div 32 = 1
+
+#define LIPT_TCTRL3 (0x40037000u + 0x58u) //LIPT TCTRL3
+#define LIPT_TVAL3 (0x40037000u + 0x50u) //LIPT TVAL2
 
 void SetOrClearBit(unsigned int *address, unsigned char position, unsigned char action);
 void SetOrClearMultiBit(unsigned int *address, unsigned char position, unsigned int mask, unsigned char action);
+
 void LEDConfig (void);
+void SW3Config (void);
+void SW3Toggle (void);
 void SysTick(void);
-void PLLConfig(void);
-void SoscConfig(void);
-void ClkOutput(void);
+
+void ClockSetting(void);
+void LiptInitialization(void);
+void Timer0Config(void);
+
+void NVICTimer2Config(void); 
+void Timer2InterruptConfig(void);
+void Timer2Config(void);
+
+void NVICTimer3Config(void); 
+void Timer3InterruptConfig(void);
+void Timer3Config(void);

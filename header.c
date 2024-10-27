@@ -31,60 +31,92 @@ void LEDConfig (void)
 	SetOrClearBit((unsigned int*) PCC_PORTD, 30u, SET_BIT);
 	SetOrClearMultiBit((unsigned int*) PORTD_PCR15, 8u, 1u, SET_BIT);
 	SetOrClearBit((unsigned int*) GPIOD_PDDR, 15u, SET_BIT); 
+	
+	SetOrClearBit((unsigned int*) GPIOD_PDOR, 15u, SET_BIT); 
 }
 
+void SW3Config (void)
+{
+	SetOrClearBit((unsigned int*) PCC_PORTC, 30u, SET_BIT);
+	SetOrClearMultiBit((unsigned int*) PORTC_PCR13, 8u, 1u, SET_BIT);
+	SetOrClearBit((unsigned int*) GPIOD_PDDR, 13u, CLEAR_BIT);
+	
+	SetOrClearMultiBit((unsigned int*) GPIOD_PDOR, 15u, 1u, SET_BIT);
+}
+
+void SW3Toggle (void)
+{
+	unsigned int state = ((*(unsigned int*)GPIOC_PDIR) & (1 << 13));
+	if (state)
+	{
+		SetOrClearBit((unsigned int*) GPIOD_PDOR, 15u, CLEAR_BIT); 
+	}
+	else
+	{
+		SetOrClearBit((unsigned int*) GPIOD_PDOR, 15u, SET_BIT); 
+	}
+}
 
 void SysTick(void)
 {
 	SetOrClearBit((unsigned int*) SYSTICK_CTRL, 0, CLEAR_BIT);
 	SetOrClearMultiBit((unsigned int*) SYSTICK_VAL, 0, 0, SET_BIT);
-	SetOrClearMultiBit((unsigned int*) SYSTICK_LOAD, 0, 800000-1, SET_BIT); //0.1s
+	SetOrClearMultiBit((unsigned int*) SYSTICK_LOAD, 0, 4800000-1, SET_BIT);
 	SetOrClearBit((unsigned int*) SYSTICK_CTRL, 0, SET_BIT);
 	SetOrClearBit((unsigned int*) SYSTICK_CTRL, 2, SET_BIT);
 	SetOrClearBit((unsigned int*) SYSTICK_CTRL, 1, SET_BIT);
 }
 
-void PLLConfig(void)
+void ClockSetting(void)
 {
-	SetOrClearBit((unsigned int*) SCG_SPLLCSR, 0, CLEAR_BIT); //disable SPPCSR
-	SetOrClearMultiBit((unsigned int*) SCG_SPLLDIV, 0, 0b001 , SET_BIT); // div by 1
-	SetOrClearBit((unsigned int*) SCG_SPLLCFG, 0, CLEAR_BIT); //Choose SOSC as input
-	SetOrClearMultiBit((unsigned int*) SCG_SPLLCFG, 8, 0b000 , SET_BIT); // div factor 1
-	SetOrClearMultiBit((unsigned int*) SCG_SPLLCFG, 16, 0b01000 , SET_BIT); // multi factor 24
-	SetOrClearBit((unsigned int*) SCG_SPLLCSR, 23, CLEAR_BIT); // Unlock SPLLCSR
-	SetOrClearBit((unsigned int*) SCG_SPLLCSR, 0, SET_BIT); //Enable SPPCSR
+	SetOrClearMultiBit((unsigned int*) PCC_LIPT, 24u, 7u, SET_BIT); //128KHz 0b111
+	SetOrClearBit((unsigned int*) PCC_LIPT, 30u, SET_BIT); //CGC
 }
 
-void SoscConfig(void)
+void LiptInitialization(void)
 {
-	SetOrClearBit((unsigned int*) SCG_SOSCCSR, 0, CLEAR_BIT); // disble SOSCCSR
-	SetOrClearBit((unsigned int*) SCG_SOSCCSR, 23, CLEAR_BIT); // Unlock SOSCCSR
-	
-	SetOrClearMultiBit((unsigned int*) SCG_SOSCDIV, 0, 0b001 , SET_BIT); // div by 1
-	SetOrClearMultiBit((unsigned int*) SCG_SOSCDIV, 8, 0b001 , SET_BIT); // div by 1
-	
-	SetOrClearBit((unsigned int*) SCG_SOSCCFG, 2, CLEAR_BIT); //EX XTAL - External crystal osc
-	SetOrClearBit((unsigned int*) SCG_SOSCCFG, 3, CLEAR_BIT); // Low gain
-	
-	SetOrClearMultiBit((unsigned int*) SCG_SOSCCFG, 4u, 0b11 , CLEAR_BIT); //0b11 clear range select
-	SetOrClearMultiBit((unsigned int*) SCG_SOSCCFG, 4u, 0b10 , SET_BIT); //0b10 Medium range
-	
-	//while(!((*(unsigned int*) SCG_SOSCCSR) & (1<<23))); /* Ensure SOSCCSR unlocked */
-	SetOrClearBit((unsigned int*) SCG_SOSCCSR, 0, SET_BIT); //enable SOSCCSR
-	//while(!((*(unsigned int*) SCG_SOSCCSR) & (1<<24))); /* Wait for sys OSC clk valid */
-	
+	SetOrClearBit((unsigned int*) LIPT_MCR, 0u, SET_BIT); //Module clock
+	SetOrClearBit((unsigned int*) LIPT_MCR, 3u, SET_BIT); //Debug enable
 }
 
-void ClkOutput(void)
+void Timer0Config(void)
 {
-	SetOrClearBit((unsigned int*) SCG_RCCR, 24u, CLEAR_BIT); // SPLL CLK
-	SetOrClearBit((unsigned int*) SCG_RCCR, 25u, CLEAR_BIT); // SPLL CLK
-	SetOrClearBit((unsigned int*) SCG_RCCR, 26u, CLEAR_BIT); // SPLL CLK
-	SetOrClearBit((unsigned int*) SCG_RCCR, 27u, CLEAR_BIT); // SPLL CLK
-	SetOrClearMultiBit((unsigned int*) SCG_RCCR, 24u, 6u , SET_BIT); // SPLL CLK
-	
-	SetOrClearMultiBit((unsigned int*) SCG_RCCR, 16u, 0b0000 , SET_BIT); // core div by 1
-	SetOrClearMultiBit((unsigned int*) SCG_RCCR, 4u, 0b0001 , SET_BIT); // bus div by 2
-	SetOrClearMultiBit((unsigned int*) SCG_RCCR, 0u, 0b1111 , CLEAR_BIT); // divslow by 3	
-	SetOrClearMultiBit((unsigned int*) SCG_RCCR, 0u, 0b0010 , SET_BIT); // divslow by 3
+	SetOrClearMultiBit((unsigned int*) LIPT_TCTRL0, 2u, 0u, SET_BIT); //32 bit Periodic 0b00
+	SetOrClearBit((unsigned int*) LIPT_TCTRL0, 0u, SET_BIT); //Timer enable
+}
+
+void NVICTimer2Config(void)
+{ 
+	// 50 Mod 32
+	SetOrClearBit((unsigned int*) NVIC_INTERRUPT, 18, SET_BIT);  // Enable NVIC interrupt LIPT channel 2
+}
+
+void Timer2InterruptConfig(void)
+{
+	SetOrClearBit((unsigned int*) LIPT_MIER, 2, SET_BIT);  // Enable Timer channel 2
+}
+
+void Timer2Config(void)
+{
+	SetOrClearMultiBit((unsigned int*) LIPT_TVAL2, 0u, 64000-1, SET_BIT);  // Enable Timer channel 2 0.5s
+	SetOrClearMultiBit((unsigned int*) LIPT_TCTRL2, 2u, 0u, SET_BIT); //32 bit Periodic 0b00
+	SetOrClearBit((unsigned int*) LIPT_TCTRL2, 0u, SET_BIT); //Timer enable
+}
+
+void NVICTimer3Config(void)
+{
+	// 51 Mod 32
+	SetOrClearBit((unsigned int*) NVIC_INTERRUPT, 19, SET_BIT);  // Enable NVIC interrupt LIPT channel 3
+}
+
+void Timer3InterruptConfig(void)
+{
+	SetOrClearBit((unsigned int*) LIPT_MIER, 3, SET_BIT);  // Enable Timer channel 3
+}
+
+void Timer3Config(void)
+{
+	SetOrClearMultiBit((unsigned int*) LIPT_TVAL3, 0u, 128000-1, SET_BIT);  // Enable Timer channe 1s
+	SetOrClearMultiBit((unsigned int*) LIPT_TCTRL3, 2u, 0b00, SET_BIT); //32 bit Periodic 0b00
+	SetOrClearBit((unsigned int*) LIPT_TCTRL3, 0u, SET_BIT); //Timer enable
 }
