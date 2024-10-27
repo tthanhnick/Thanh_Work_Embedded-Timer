@@ -38,12 +38,12 @@ int main(void)
 
 void LPIT0_Ch2_IRQHandler (void)
 {
-	//counter++;
+	//counter++; //enable if use timer 2
 	SetOrClearBit((unsigned int*) LIPT_MSR, 2, SET_BIT);  // Channel 2 Timmer flag
 }
 
 void LPIT0_Ch3_IRQHandler (void)
 {
-	counter++;
-	SetOrClearBit((unsigned int*) LIPT_MSR, 3, SET_BIT);  // Channel 2 Timmer flag
+	counter++; //enable if use timer 3
+	SetOrClearBit((unsigned int*) LIPT_MSR, 3, SET_BIT);  // Channel 3 Timmer flag
 }
